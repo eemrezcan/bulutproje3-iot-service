@@ -1,14 +1,17 @@
-import os
-
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="IoT Service", version="0.1.0")
+from app.api.routes import router
+from app.core.lifecycle import lifespan
 
+app = FastAPI(title="IoT Service", version="1.0.0", lifespan=lifespan)
 
-@app.get("/health")
-def health() -> dict[str, str]:
-    return {
-        "service": os.getenv("SERVICE_NAME", "iot-service"),
-        "status": "ok",
-    }
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+app.include_router(router)
