@@ -7,12 +7,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     service_name: str = Field(default="iot-service", alias="SERVICE_NAME")
     aws_region: str = Field(default="eu-central-1", alias="AWS_REGION")
-    aws_access_key_id: str = Field(default="local", alias="AWS_ACCESS_KEY_ID")
-    aws_secret_access_key: str = Field(default="local", alias="AWS_SECRET_ACCESS_KEY")
+    aws_access_key_id: str | None = Field(default=None, alias="AWS_ACCESS_KEY_ID")
+    aws_secret_access_key: str | None = Field(default=None, alias="AWS_SECRET_ACCESS_KEY")
     dynamodb_endpoint_url: str | None = Field(
-        default="http://localhost:8000",
+        default=None,
         alias="DYNAMODB_ENDPOINT_URL",
     )
+    mqtt_enabled: bool = Field(default=True, alias="MQTT_ENABLED")
     mqtt_host: str = Field(default="localhost", alias="MQTT_HOST")
     mqtt_port: int = Field(default=1883, alias="MQTT_PORT")
     mqtt_keepalive: int = Field(default=60, alias="MQTT_KEEPALIVE")

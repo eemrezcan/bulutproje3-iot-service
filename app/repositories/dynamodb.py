@@ -33,11 +33,13 @@ def from_dynamodb_value(value: Any) -> Any:
 
 class DynamoDBClient:
     def __init__(self, settings: Settings) -> None:
-        kwargs = {
-            "region_name": settings.aws_region,
-            "aws_access_key_id": settings.aws_access_key_id,
-            "aws_secret_access_key": settings.aws_secret_access_key,
-        }
+        kwargs = {"region_name": settings.aws_region}
+        if settings.aws_access_key_id and settings.aws_secret_access_key:
+            kwargs["aws_access_key_id"] = settings.aws_access_key_id
+            kwargs["aws_secret_access_key"] = settings.aws_secret_access_key
+        elif settings.dynamodb_endpoint_url:
+            kwargs["aws_access_key_id"] = "local"
+            kwargs["aws_secret_access_key"] = "local"
         if settings.dynamodb_endpoint_url:
             kwargs["endpoint_url"] = settings.dynamodb_endpoint_url
 

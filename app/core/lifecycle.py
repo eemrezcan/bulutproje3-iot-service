@@ -13,6 +13,23 @@ from app.services.sensor_service import SensorService
 from app.simulator.worker import SensorSimulatorWorker
 
 
+class DisabledMQTTClient:
+    connected = False
+
+    def disconnect(self) -> None:
+        return None
+
+
+class DisabledSensorSimulatorWorker:
+    running = False
+
+    def start(self) -> bool:
+        return False
+
+    def stop(self) -> bool:
+        return False
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
@@ -26,11 +43,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     sensor_service = SensorService(sensor_repository)
     reading_service = ReadingService(reading_repository, sensor_repository)
-    mqtt_client = MQTTTelemetryClient(settings, reading_service)
-    mqtt_client.connect()
 
-    simulator = SensorSimulatorWorker(settings, sensor_service.list_sensors())
-    if settings.simulator_autostart:
+    if settings.mqtt_enabled:
+        mqtt_client = MQTTTelemetryClient(settings, reading_service)
+        mqtt_client.connect()
+        simulator = SensorSimulatorWorker(settings, sensor_service.list_sensors())
+    else:
+        mqtt_client = DisabledMQTTClient()
+        simulator = DisabledSensorSimulatorWorker()
+
+    if settings.mqtt_enabled and settings.simulator_autostart:
         simulator.start()
 
     app.state.settings = settings
